@@ -632,7 +632,9 @@ ngx_open_listening_sockets(ngx_cycle_t *cycle)
 
 #if (NGX_HAVE_UNIX_DOMAIN)
 
-            if (ls[i].sockaddr->sa_family == AF_UNIX) {
+            if (ls[i].sockaddr->sa_family == AF_UNIX
+                && ls[i].addr_text.data[sizeof("unix:") - 1] != '@')
+            {
                 mode_t   mode;
                 u_char  *name;
 
@@ -1094,6 +1096,7 @@ ngx_close_listening_sockets(ngx_cycle_t *cycle)
 #if (NGX_HAVE_UNIX_DOMAIN)
 
         if (ls[i].sockaddr->sa_family == AF_UNIX
+            && ls[i].addr_text.data[sizeof("unix:") - 1] != '@'
             && ngx_process <= NGX_PROCESS_MASTER
             && ngx_new_binary == 0
             && (!ls[i].inherited || ngx_getppid() != ngx_parent))

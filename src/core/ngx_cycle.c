@@ -771,7 +771,9 @@ old_shm_zone_done:
 
 #if (NGX_HAVE_UNIX_DOMAIN)
 
-        if (ls[i].sockaddr->sa_family == AF_UNIX) {
+        if (ls[i].sockaddr->sa_family == AF_UNIX
+            && ls[i].addr_text.data[sizeof("unix:") - 1] != '@')
+        {
             u_char  *name;
 
             name = ls[i].addr_text.data + sizeof("unix:") - 1;

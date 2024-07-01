@@ -252,6 +252,9 @@ ngx_sock_ntop(struct sockaddr *sa, socklen_t socklen, u_char *text, size_t len,
         if (socklen <= (socklen_t) offsetof(struct sockaddr_un, sun_path)) {
             p = ngx_snprintf(text, len, "unix:%Z");
 
+        } else if (saun->sun_path[0] == '\0') {
+            p = ngx_snprintf(text, len, "unix:@%s%Z", &saun->sun_path[1]);
+
         } else {
             n = ngx_strnlen((u_char *) saun->sun_path,
                             socklen - offsetof(struct sockaddr_un, sun_path));
@@ -754,6 +757,10 @@ ngx_parse_unix_domain_url(ngx_pool_t *pool, ngx_url_t *u)
     saun->sun_family = AF_UNIX;
     (void) ngx_cpystrn((u_char *) saun->sun_path, path, len);
 
+    if (path[0] == '@') {
+        saun->sun_path[0] = '\0';
+    }
+
     u->addrs = ngx_pcalloc(pool, sizeof(ngx_addr_t));
     if (u->addrs == NULL) {
         return NGX_ERROR;
@@ -769,6 +776,10 @@ ngx_parse_unix_domain_url(ngx_pool_t *pool, ngx_url_t *u)
 
     saun->sun_family = AF_UNIX;
     (void) ngx_cpystrn((u_char *) saun->sun_path, path, len);
+
+    if (path[0] == '@') {
+        saun->sun_path[0] = '\0';
+    }
 
     u->addrs[0].sockaddr = (struct sockaddr *) saun;
     u->addrs[0].socklen = sizeof(struct sockaddr_un);
